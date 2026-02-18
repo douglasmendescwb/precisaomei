@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz: Qual sua Energia Empreendedora? | Precisão MEI</title>
+    
+    <!-- PWA Settings (iOS & Android) -->
+    <meta name="theme-color" content="#fff0f5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Precisão MEI">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4205/4205479.png"> 
+    
+    <!-- Libs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Mulish:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CONFIGURAÇÃO DO TAILWIND -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Mulish', 'sans-serif'], serif: ['Cinzel', 'serif'] },
+                    colors: {
+                        brand: { 
+                            dark: '#0a1028', 
+                            gold: '#cfa76e', 
+                            goldHover: '#b5925e',
+                            rose: '#fff1f2',
+                            nude: '#fdf2f8'
+                        },
+                    },
+                    animation: {
+                        'float': 'float 4s ease-in-out infinite',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        fadeInUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- ESTILOS CUSTOMIZADOS -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #fff0f5 0%, #ffffff 50%, #fff8e1 100%); /* Gradiente Nude/Blush */
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Glassmorphism Quiz (Feminino/Delicado) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 50px -10px rgba(207, 167, 110, 0.15);
+        }
+
+        /* Botões Estilo Sticker (Apple Vibe) */
+        .sticker-btn {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: scale(1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .sticker-btn:active { transform: scale(0.96); }
+        .sticker-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border-color: #cfa76e; 
+            background: #fffbf2;
+        }
+        
+        /* Plan Cards */
+        .plan-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -5px rgba(10, 16, 40, 0.1);
+            border-color: #cfa76e;
+        }
+
+        /* Listas de Preço */
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #4b5563;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .feature-list li::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23cfa76e'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+        .feature-list.dark-mode li { color: #d1d5db; }
+        
+        /* Utilitários */
+        .hidden-section { display: none !important; }
+        .visible-section { display: block !important; animation: fadeUp 0.8s ease-out; }
+    </style>
+
+    <!-- TRACKING -->
+    <script>
+        // SEUS IDs
+        const CONFIG = {
+            FACEBOOK_PIXEL_ID: 'SEU_PIXEL_ID', 
+            GTM_ID: 'GTM-XXXXXX'
+        };
+
+        function trackEvent(eventName, params = {}) {
+            console.log(`📡 Evento: ${eventName}`, params);
+            if(typeof fbq !== 'undefined') fbq('track', eventName, params);
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ 'event': eventName, ...params });
+        }
+
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        
+        trackEvent('PageView');
+    </script>
+</head>
+<body class="min-h-screen text-brand-dark font-sans selection:bg-brand-gold selection:text-white">
+
+    <!-- ============================================================
+         SEÇÃO 1: O QUIZ (Vibe Lifestyle - Apple Emojis)
+         ============================================================ -->
+    <section id="quiz-section" class="min-h-screen flex flex-col items-center justify-center p-4 relative z-20">
+        
+        <!-- Header Progresso -->
+        <div class="w-full max-w-[480px] mb-4 flex justify-between items-center px-4 opacity-60">
+            <span class="text-[10px] font-bold tracking-widest uppercase">TESTE DE PERFIL 2026</span>
+            <div class="h-1 w-20 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-brand-gold w-[10%] transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <div class="glass-card w-full max-w-[480px] rounded-[2.5rem] p-6 sm:p-8 relative min-h-[600px] flex flex-col shadow-xl transition-all duration-500">
+
+            <!-- TELA 1: NOME (Conexão) -->
+            <div id="step-1" class="step-content flex-1 flex flex-col justify-center text-center animate-fade-in-up">
+                <div class="mb-6 animate-float flex justify-center">
+                    <img src="https://em-content.zobj.net/source/apple/354/sparkles_2728.png" class="w-20 h-20" alt="Sparkles">
+                </div>
+                <h1 class="font-serif text-3xl font-bold mb-3 text-brand-dark">Qual a sua <br><span class="text-brand-gold">Energia?</span></h1>
+                <p class="text-gray-500 text-sm mb-8 px-4 leading-relaxed">Descubra qual arquétipo de empreendedora você será em 2026.</p>
+
+                <div class="text-left space-y-2 mb-6">
+                    <label class="text-xs font-bold text-gray-400 uppercase ml-2">Como te chamam?</label>
+                    <input type="text" id="user-name-input" class="w-full rounded-2xl bg-gray-50 border border-gray-100 px-5 py-4 text-xl font-bold text-brand-dark focus:outline-none focus:border-brand-gold focus:bg-white transition-all placeholder-gray-300" placeholder="Seu nome aqui...">
+                </div>
+                
+                <button onclick="validateName()" class="w-full bg-brand-dark text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 group">
+                    COMEÇAR O TESTE 
+                    <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                </button>
+            </div>
+
+            <!-- TELA 2: FASE (Lifestyle) -->
+            <div id="step-2" class="step-content flex-1 flex-col justify-center hidden-section">
+                <h2 class="font-serif text-2xl font-bold text-center mb-2">Oi, <span class="user-name-display text-brand-gold">Amiga</span>! 👋</h2>
+                <p class="text-center text-gray-400 text-xs mb-8">Pra começar, qual frase define seu momento?</p>
+                
+                <div class="space-y-4">
+                    <button onclick="nextStep(3)" class="sticker-btn w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 text-left shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/seedling_1f331.png" class="w-10 h-10" alt="Seedling">
+                        <div><span class="block font-bold text-gray-700">Tirando a ideia do papel</span><span class="text-[10px] text-gray-400">Tudo é novidade e empolgação</span></div>
+                    </button>
+                    <button onclick="nextStep(3)" class="sticker-btn w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 text-left shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/rocket_1f680.png" class="w-10 h-10" alt="Rocket">
+                        <div><span class="block font-bold text-gray-700">Já vendo, mas quero crescer</span><span class="text-[10px] text-gray-400">Hora de profissionalizar</span></div>
+                    </button>
+                    <button onclick="nextStep(3)" class="sticker-btn w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 text-left shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/crown_1f451.png" class="w-10 h-10" alt="Crown">
+                        <div><span class="block font-bold text-gray-700">Sou a Dona de Tudo</span><span class="text-[10px] text-gray-400">Dominação mundial em andamento</span></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TELA 3: O SONHO (Dopamina Visual) -->
+            <div id="step-3" class="step-content flex-1 flex-col justify-center hidden-section">
+                <h2 class="font-serif text-2xl font-bold text-center mb-6">O que faz seus olhos brilharem? 🤩</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="nextStep(4)" class="sticker-btn aspect-square bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 p-2 text-center shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/airplane_2708-fe0f.png" class="w-12 h-12 mb-1" alt="Airplane">
+                        <span class="text-xs font-bold text-gray-600">Viajar quando<br>eu quiser</span>
+                    </button>
+                    <button onclick="nextStep(4)" class="sticker-btn aspect-square bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 p-2 text-center shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/house_1f3e0.png" class="w-12 h-12 mb-1" alt="House">
+                        <span class="text-xs font-bold text-gray-600">A Casa dos<br>Sonhos</span>
+                    </button>
+                    <button onclick="nextStep(4)" class="sticker-btn aspect-square bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 p-2 text-center shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/star_2b50.png" class="w-12 h-12 mb-1" alt="Star">
+                        <span class="text-xs font-bold text-gray-600">Ser Famosa/<br>Reconhecida</span>
+                    </button>
+                    <button onclick="nextStep(4)" class="sticker-btn aspect-square bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 p-2 text-center shadow-sm">
+                        <img src="https://em-content.zobj.net/source/apple/354/family-woman-girl-boy_1f469-200d-1f467-200d-1f466.png" class="w-12 h-12 mb-1" alt="Family">
+                        <span class="text-xs font-bold text-gray-600">Tempo de<br>Qualidade</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TELA 4: A PERSONALIDADE (Onde entra a dor suave) -->
+            <div id="step-4" class="step-content flex-1 flex-col justify-center hidden-section">
+                <h2 class="font-serif text-2xl font-bold text-center mb-2">Qual seu "ponto fraco"? 🫣</h2>
+                <p class="text-center text-gray-400 text-xs mb-8">Seja honesta, ninguém tá vendo!</p>
+                
+                <div class="space-y-4">
+                    <button onclick="finishQuiz('Criativa')" class="sticker-btn w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center justify-between text-left shadow-sm group">
+                        <div class="flex items-center gap-3">
+                            <img src="https://em-content.zobj.net/source/apple/354/nail-polish_1f485.png" class="w-10 h-10" alt="Nails">
+                            <div>
+                                <span class="block font-bold text-gray-700">Sou Criativa Demais</span>
+                                <span class="text-[10px] text-gray-400">Tenho 1000 ideias e me perco na organização.</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="finishQuiz('Burocracia')" class="sticker-btn w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center justify-between text-left shadow-sm group">
+                        <div class="flex items-center gap-3">
+                            <img src="https://em-content.zobj.net/source/apple/354/face-exhaling_1f62e-200d-1f4a8.png" class="w-10 h-10" alt="Exhaling">
+                            <div>
+                                <span class="block font-bold text-gray-700">Detesto "Papelada"</span>
+                                <span class="text-[10px] text-gray-400">Planilhas e burocracia sugam minha alma.</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="finishQuiz('Centralizadora')" class="sticker-btn w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center justify-between text-left shadow-sm group">
+                        <div class="flex items-center gap-3">
+                            <img src="https://em-content.zobj.net/source/apple/354/pleading-face_1f97a.png" class="w-10 h-10" alt="Pleading">
+                            <div>
+                                <span class="block font-bold text-gray-700">Sou Centralizadora</span>
+                                <span class="text-[10px] text-gray-400">Tento fazer tudo sozinha e fico exausta.</span>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TELA 5: LOADING (Astrologia/Vibe) -->
+            <div id="step-loading" class="step-content flex-1 flex-col justify-center text-center hidden-section">
+                <div class="relative w-32 h-32 mx-auto mb-6">
+                    <div class="absolute inset-0 bg-brand-gold/20 rounded-full animate-pulse"></div>
+                    <div class="absolute inset-0 flex items-center justify-center animate-bounce">
+                        <img src="https://em-content.zobj.net/source/apple/354/crystal-ball_1f52e.png" class="w-16 h-16" alt="Crystal Ball">
+                    </div>
+                </div>
+                
+                <h2 class="text-xl font-serif font-bold text-brand-dark mb-4">Lendo sua energia...</h2>
+                
+                <div id="loading-msgs" class="bg-white/60 backdrop-blur-sm rounded-xl p-5 max-w-[280px] mx-auto text-left space-y-3 text-xs font-semibold text-gray-600 shadow-sm border border-white">
+                    <p class="opacity-0 translate-y-2 transition-all duration-500" id="msg-1">✨ Mapeando seus talentos...</p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-500" id="msg-2">⭐ Identificando bloqueios...</p>
+                    <p class="opacity-0 translate-y-2 transition-all duration-500 text-brand-gold" id="msg-3">🦋 Arquétipo encontrado!</p>
+                </div>
+            </div>
+
+            <!-- TELA 6: RESULTADO (Sanduíche de Feedback) - PRE-VENDA -->
+            <div id="step-result" class="step-content flex-1 flex-col justify-center text-center hidden-section relative">
+                
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4">
+                    <span class="bg-brand-dark text-white px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg">Seu Arquétipo 2026</span>
+                </div>
+
+                <div class="mb-4 pt-4">
+                    <h2 class="text-4xl font-serif font-black text-brand-dark leading-none mb-1">A VISIONÁRIA</h2>
+                    <p class="font-serif text-brand-gold text-lg italic tracking-wide">"Nasceu para brilhar, não para surtar."</p>
+                </div>
+
+                <!-- O Feedback "Sanduíche" -->
+                <div class="bg-gradient-to-br from-white to-pink-50 border border-pink-100 p-5 rounded-2xl text-left shadow-sm mb-6 relative">
+                    <p class="text-sm text-gray-700 leading-relaxed">
+                        <span class="user-name-display font-bold text-brand-dark">Amiga</span>, sua energia é de pura expansão! 🦋<br><br>
+                        Seu superpoder é a <b>CRIATIVIDADE</b>. Você vê oportunidades onde ninguém vê.<br><br>
+                        <span class="block bg-red-50 text-red-500 p-2 rounded-lg text-xs font-bold mt-2 flex items-center gap-2">
+                            <img src="https://em-content.zobj.net/source/apple/354/high-voltage_26a1.png" class="w-4 h-4"> SEU ÚNICO PONTO FRACO:
+                        </span>
+                        A parte "chata" (organização, bastidores, rotina) está drenando sua energia criativa. Você tenta carregar o mundo nas costas e isso te impede de voar mais alto.
+                    </p>
+                </div>
+
+                <button onclick="revealSalesPage()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-600/20 hover:scale-[1.02] transition-all flex flex-col items-center justify-center animate-pulse-slow">
+                    <span class="text-sm flex items-center gap-2">VER O SEGREDO DAS VISIONÁRIAS 🔓</span>
+                    <span class="text-[10px] opacity-80 font-normal">Descubra como ter um "Assistente Automático"</span>
+                </button>
+            </div>
+
+        </div>
+        <p class="text-center text-[10px] text-gray-400 mt-4 font-medium opacity-60">Feito com 🤍 para empreendedoras.</p>
+    </section>
+
+    <!-- ============================================================
+         SEÇÃO 2: A PÁGINA DE VENDAS "DOSSIÊ"
+         Mostrada apenas após o quiz
+         ============================================================ -->
+    <section id="sales-section" class="hidden-section bg-gray-50 pb-20">
+        
+        <!-- FAIXA DE ALERTA -->
+        <div class="bg-brand-dark text-white text-center py-2 text-xs font-bold tracking-widest uppercase sticky top-0 z-50">
+            ⚠ Relatório Confidencial: <span class="user-name-display text-brand-gold">Amiga</span>
+        </div>
+
+        <!-- HEADER DO DIAGNÓSTICO -->
+        <header class="bg-white border-b border-gray-100 py-12 px-4 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-brand-gold"></div>
+            <div class="max-w-4xl mx-auto">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">RESULTADO DA ANÁLISE:</p>
+                <h1 class="font-serif text-4xl md:text-5xl font-black text-brand-dark mb-2">A VISIONÁRIA</h1>
+                <p class="font-serif text-brand-gold text-lg italic">"Talento sobra. Organização falta."</p>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto px-4 mt-8 space-y-12">
+
+            <!-- BLOCO 1: O ELOGIO (CONEXÃO) -->
+            <section class="prose prose-lg mx-auto text-gray-600 leading-relaxed max-w-2xl text-center md:text-left">
+                <p class="text-xl font-medium text-gray-800">
+                    Olá, <span class="font-bold text-brand-gold user-name-display">Amiga</span>.
+                </p>
+                <p>
+                    Se você chegou até aqui, o teste confirmou o que você já sentia: <b>Você não nasceu para ser funcionária.</b> Você nasceu para criar, vender e construir um império.
+                </p>
+                <p>
+                    Sua mente não para. Você tem ideias no chuveiro, no trânsito, antes de dormir. Enquanto as outras pessoas veem problemas, você vê oportunidades de lucro.
+                </p>
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 my-6 rounded-r-lg text-left">
+                    <p class="font-bold text-green-800 m-0 text-sm">✨ Seu Superpoder:</p>
+                    <p class="m-0 text-sm text-green-700">Criatividade Explosiva & Venda Natural.</p>
+                </div>
+            </section>
+
+            <!-- BLOCO 2: A FERIDA & CHART.JS -->
+            <section class="bg-white border border-gray-100 shadow-xl rounded-2xl p-6 md:p-10 relative">
+                <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-1 rounded-full text-xs font-bold uppercase shadow-lg">
+                    O Alerta Vermelho
+                </div>
+                
+                <h2 class="font-serif text-2xl font-bold text-brand-dark text-center mb-6">Por que 60% das Visionárias quebram em 2 anos?</h2>
+                
+                <p class="mb-6 text-center text-gray-600 max-w-2xl mx-auto">
+                    Existe um vilão silencioso que mata negócios promissores como o seu. O nome dele é <span class="bg-red-100 text-red-800 px-1 font-bold">Burocracia</span>.
+                    Veja a projeção de quem tenta fazer tudo sozinha vs. quem tem um sistema:
+                </p>
+                
+                <!-- Chart Container -->
+                <div class="relative w-full h-[300px] mb-8">
+                    <canvas id="growthChart"></canvas>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-red-50 p-5 rounded-xl">
+                        <h3 class="font-bold text-red-800 mb-3 text-sm uppercase">O Ciclo da Falência:</h3>
+                        <ul class="space-y-2 text-sm text-red-700">
+                            <li class="flex gap-2">❌ Mistura conta PF e PJ</li>
+                            <li class="flex gap-2">❌ Esquece de pagar o DAS (Multa!)</li>
+                            <li class="flex gap-2">❌ Não sabe se teve lucro real</li>
+                        </ul>
+                    </div>
+                    <div class="bg-brand-dark p-5 rounded-xl text-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-20 h-20 bg-brand-gold opacity-20 rounded-full blur-2xl"></div>
+                        <h3 class="font-bold text-brand-gold mb-3 text-sm uppercase">O Ciclo do Sucesso:</h3>
+                        <ul class="feature-list text-gray-200">
+                            <li>Financeiro Automático</li>
+                            <li>Impostos em dia (sem ver)</li>
+                            <li>Lucro separado do Salário</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BLOCO 3: A SOLUÇÃO -->
+            <section class="text-center space-y-6">
+                <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">APRESENTANDO SUA NOVA SÓCIA</p>
+                <h2 class="font-serif text-3xl md:text-4xl font-black text-brand-dark">Pare de tentar ser Contadora.<br>Seja apenas CEO.</h2>
+                <p class="max-w-xl mx-auto text-gray-600">
+                    Você não precisa de um escritório caro. Você precisa de inteligência. Conheça o sistema que automatiza a parte "chata" para você brilhar.
+                </p>
+            </section>
+
+            <!-- TABELA DE PREÇOS (IDÊNTICA À IMAGEM) -->
+            <div id="pricing-anchor" class="grid md:grid-cols-3 gap-6">
+
+                <!-- PLANO START -->
+                <div class="plan-card bg-white rounded-2xl p-6 flex flex-col relative">
+                    <h3 class="font-bold text-2xl text-brand-dark mb-1">Precisão Start</h3>
+                    <div class="flex items-baseline gap-1 mb-4">
+                        <span class="text-sm text-gray-500">R$</span>
+                        <span class="text-4xl font-bold text-brand-dark">49,90</span>
+                        <span class="text-sm text-gray-500">/mês</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6 min-h-[40px] leading-tight">O plano ideal para começar sua gestão de forma simples e organizada.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <button onclick="checkout('start', 'create')" class="w-full bg-brand-dark text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition-colors text-sm">QUERO ABRIR MEI</button>
+                        <button onclick="checkout('start', 'signup')" class="w-full bg-white border border-brand-dark text-brand-dark font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm">JÁ TENHO MEI</button>
+                    </div>
+                    <div class="border-t border-gray-100 my-4"></div>
+                    <ul class="feature-list">
+                        <li>DAS mensal automático</li>
+                        <li>Declaração anual</li>
+                        <li>Lançamento de caixa</li>
+                        <li>Contas a pagar</li>
+                        <li>Contas a receber</li>
+                        <li>Relatório financeiro simples</li>
+                        <li>Emissão de recibos</li>
+                        <li>Emissão de até 5 notas de serviço/mês</li>
+                        <li>Acesso Web + App</li>
+                    </ul>
+                </div>
+
+                <!-- PLANO ESSENCIAL (POPULAR) -->
+                <div class="plan-card bg-brand-dark rounded-2xl p-6 flex flex-col relative transform md:-translate-y-4 border-brand-gold shadow-2xl">
+                    <div class="absolute top-4 right-4 bg-brand-gold text-brand-dark text-[10px] font-bold px-2 py-1 rounded">POPULAR</div>
+                    <h3 class="font-bold text-2xl text-brand-gold mb-1">Precisão Essencial</h3>
+                    <div class="flex items-baseline gap-1 mb-4">
+                        <span class="text-sm text-gray-400">R$</span>
+                        <span class="text-4xl font-bold text-white">69,90</span>
+                        <span class="text-sm text-gray-400">/mês</span>
+                    </div>
+                    <p class="text-xs text-gray-300 mb-6 min-h-[40px] leading-tight">Para quem precisa de mais recursos e controle do negócio.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <button onclick="checkout('essencial', 'create')" class="w-full bg-brand-gold text-brand-dark font-bold py-3 rounded-xl hover:bg-white transition-colors text-sm shadow-glow">QUERO ABRIR MEI</button>
+                        <button onclick="checkout('essencial', 'signup')" class="w-full bg-transparent border border-brand-gold text-brand-gold font-bold py-3 rounded-xl hover:bg-brand-gold/10 transition-colors text-sm">JÁ TENHO MEI</button>
+                    </div>
+                    <div class="border-t border-gray-700 my-4"></div>
+                    <ul class="feature-list dark-mode">
+                        <li>DAS mensal automático</li>
+                        <li>Declaração anual</li>
+                        <li>Lançamento de caixa</li>
+                        <li>Contas a pagar</li>
+                        <li>Contas a receber</li>
+                        <li>Relatório financeiro simples</li>
+                        <li>Emissão de recibos</li>
+                        <li>Emissão de até 20 notas de serviço/mês</li>
+                        <li>Emissão de até 20 notas de comércio/mês</li>
+                        <li>Acesso Web + App</li>
+                        <li>Cadastro de produtos</li>
+                        <li>Controle de estoque</li>
+                        <li>Cadastro de fornecedores</li>
+                        <li>Relatórios financeiros detalhados</li>
+                        <li>Monitoramento de faturamento</li>
+                        <li>Revisão anual completa</li>
+                    </ul>
+                </div>
+
+                <!-- PLANO PRIME -->
+                <div class="plan-card bg-white rounded-2xl p-6 flex flex-col relative">
+                    <h3 class="font-bold text-2xl text-brand-dark mb-1">Precisão Prime</h3>
+                    <div class="flex items-baseline gap-1 mb-4">
+                        <span class="text-sm text-gray-500">R$</span>
+                        <span class="text-4xl font-bold text-brand-dark">179,90</span>
+                        <span class="text-sm text-gray-500">/mês</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6 min-h-[40px] leading-tight">O plano completo com todos os recursos e suporte premium.</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <button onclick="checkout('prime', 'create')" class="w-full bg-brand-dark text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition-colors text-sm">QUERO ABRIR MEI</button>
+                        <button onclick="checkout('prime', 'signup')" class="w-full bg-white border border-brand-dark text-brand-dark font-bold py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm">JÁ TENHO MEI</button>
+                    </div>
+                    <div class="border-t border-gray-100 my-4"></div>
+                    <ul class="feature-list">
+                        <li>Todas do Essencial +</li>
+                        <li>Notas de serviço ilimitadas</li>
+                        <li>Notas de comércio ilimitadas</li>
+                        <li>Acesso Web + App</li>
+                        <li>Cadastro de produtos</li>
+                        <li>Controle de estoque</li>
+                        <li>Cadastro de fornecedores</li>
+                        <li>Relatórios financeiros detalhados</li>
+                        <li>Monitoramento de faturamento</li>
+                        <li>Relatórios completos gerenciais</li>
+                        <li>Painel gerencial</li>
+                        <li>Alertas inteligentes</li>
+                        <li>Monitoramento avançado</li>
+                        <li>Parcelamento DAS com acompanhamento</li>
+                        <li>Regularização completa</li>
+                        <li>Suporte contábil premium</li>
+                        <li>Revisão anual</li>
+                        <li>Criação automática de site por IA (exclusivo)</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- GARANTIA -->
+            <div class="text-center pb-10">
+                <div class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm text-xs font-bold text-gray-500">
+                    <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    GARANTIA DE 7 DIAS • RISCO ZERO
+                </div>
+                <p class="text-[10px] text-gray-400 mt-4">© 2026 Precisão MEI Tecnologia LTDA.</p>
+            </div>
+
+        </main>
+    </section>
+
+    <!-- LOGICA JS -->
+    <script>
+        let userName = "Amiga";
+        let currentStep = 1;
+
+        function nextStep(target) {
+            const currentEl = document.getElementById(`step-${currentStep}`);
+            currentEl.style.opacity = '0';
+            currentEl.style.transform = 'translateY(-10px)';
+            currentEl.style.transition = 'all 0.3s ease';
+
+            setTimeout(() => {
+                currentEl.classList.add('hidden-section');
+                
+                const nextEl = document.getElementById(`step-${target}`);
+                nextEl.classList.remove('hidden-section');
+                
+                requestAnimationFrame(() => {
+                    nextEl.style.opacity = '0';
+                    nextEl.style.transform = 'translateY(20px)';
+                    nextEl.style.transition = 'all 0.5s ease';
+                    requestAnimationFrame(() => {
+                        nextEl.style.opacity = '1';
+                        nextEl.style.transform = 'translateY(0)';
+                    });
+                });
+
+                document.getElementById('progress-bar').style.width = `${(target/6)*100}%`;
+                currentStep = target;
+            }, 300);
+        }
+
+        function validateName() {
+            const input = document.getElementById('user-name-input');
+            if(input.value.length < 2) { input.focus(); return; }
+            userName = input.value.split(' ')[0];
+            document.querySelectorAll('.user-name-display').forEach(el => el.innerText = userName);
+            trackEvent('ViewContent', { content_name: 'Quiz Started' });
+            nextStep(2);
+        }
+
+        function finishQuiz(resultType) {
+            trackEvent('QuizComplete', { result: resultType });
+            nextStep('loading');
+
+            setTimeout(() => { document.getElementById('msg-1').style.opacity = 1; document.getElementById('msg-1').style.transform = 'translateY(0)'; }, 500);
+            setTimeout(() => { document.getElementById('msg-2').style.opacity = 1; document.getElementById('msg-2').style.transform = 'translateY(0)'; }, 1500);
+            setTimeout(() => { document.getElementById('msg-3').style.opacity = 1; document.getElementById('msg-3').style.transform = 'translateY(0)'; }, 2500);
+
+            setTimeout(() => {
+                nextStep('result'); // Vai para o Sanduíche de Feedback
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#cfa76e', '#ffb6c1'] });
+            }, 4000);
+        }
+
+        function revealSalesPage() {
+            trackEvent('Lead', { content_name: 'Sales Page View' });
+            
+            const quizSection = document.getElementById('quiz-section');
+            quizSection.style.opacity = '0';
+            
+            setTimeout(() => {
+                quizSection.style.display = 'none';
+                
+                const salesSection = document.getElementById('sales-section');
+                salesSection.classList.remove('hidden-section');
+                salesSection.classList.add('visible-section');
+                
+                renderChart();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            const gradientGold = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientGold.addColorStop(0, 'rgba(207, 167, 110, 0.6)');
+            gradientGold.addColorStop(1, 'rgba(207, 167, 110, 0.0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Hoje', 'Mês 3', 'Mês 6', 'Mês 12', '2026'],
+                    datasets: [
+                        {
+                            label: 'Com Precisão MEI',
+                            data: [10, 25, 45, 80, 100],
+                            borderColor: '#cfa76e',
+                            backgroundColor: gradientGold,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Sem Sistema (Caos)',
+                            data: [10, 15, 8, 12, 5],
+                            borderColor: '#f87171',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true, position: 'bottom' } },
+                    scales: { y: { display: false }, x: { grid: { display: false } } },
+                    animation: { duration: 2000, easing: 'easeOutQuart' }
+                }
+            });
+        }
+
+        function checkout(plan, type) {
+            let price = 0;
+            if(plan === 'start') price = 49.90;
+            if(plan === 'essencial') price = 69.90;
+            if(plan === 'prime') price = 179.90;
+
+            trackEvent('InitiateCheckout', {
+                content_name: `Plano ${plan} - ${type}`,
+                value: price,
+                currency: 'BRL'
+            });
+
+            const baseUrl = `https://checkout.precisaomei.com.br/mei/${type}?plan=${plan}`;
+            window.location.href = baseUrl;
+        }
+    </script>
+</body>
+</html>
