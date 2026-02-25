@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Precisão MEI — Sua gestão no automático</title>
+  <meta name="description" content="O app completo para MEI: DAS automático, notas fiscais, controle financeiro e muito mais. Tudo num único lugar." />
+  
+  <!-- PWA Settings (iOS & Android) -->
+  <meta name="theme-color" content="#fff0f5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Precisão MEI">
+  
+  <link rel="apple-touch-icon" href="icone.svg"> 
+  <link rel="icon" type="image/svg+xml" href="icone.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8C97A;
+      --dark: #0F0F1A;
+      --dark2: #17172A;
+      --dark3: #1E1E35;
+      --white: #F8F6F0;
+      --muted: #8A8A9A;
+      --green: #3DAA6B;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      overflow-x: hidden;
+      line-height: 1.6;
+      /* espaço para o sticky bar no mobile */
+      padding-bottom: 0;
+    }
+
+    /* Apple emoji sizes */
+    img.ae    { display: inline-block; width: 1.35em; height: 1.35em; vertical-align: -0.22em; object-fit: contain; }
+    img.ae-lg { display: block; width: 36px; height: 36px; object-fit: contain; margin-bottom: 14px; }
+    img.ae-ft { display: inline-block; width: 22px; height: 22px; object-fit: contain; }
+    img.ae-ck { display: inline-block; width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; margin-top: 2px; }
+
+    /* ===== STICKY BAR MOBILE ===== */
+    .sticky-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(15, 15, 26, 0.97);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(201,168,76,0.25);
+      padding: 12px 20px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    .sticky-bar a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--gold);
+      color: #0F0F1A;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 15px 24px;
+      border-radius: 100px;
+      text-decoration: none;
+      box-shadow: 0 0 30px rgba(201,168,76,0.4);
+      letter-spacing: -0.01em;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 28px 70px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(61,170,107,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 32px;
+      animation: fadeDown 0.6s ease both;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; flex-shrink: 0; }
+    .hero-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(40px, 10vw, 80px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      max-width: 900px;
+      animation: fadeDown 0.7s 0.1s ease both;
+    }
+    .hero-headline em { font-style: italic; color: var(--gold); }
+    .hero-sub {
+      margin-top: 20px;
+      font-size: clamp(15px, 4vw, 20px);
+      color: var(--muted);
+      max-width: 560px;
+      font-weight: 300;
+      animation: fadeDown 0.7s 0.2s ease both;
+    }
+    .hero-cta {
+      margin-top: 40px;
+      animation: fadeDown 0.7s 0.3s ease both;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gold);
+      color: #0F0F1A;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 18px 42px;
+      border-radius: 100px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      box-shadow: 0 0 40px rgba(201,168,76,0.35);
+      letter-spacing: -0.01em;
+    }
+    .btn-primary:hover { transform: translateY(-2px); background: var(--gold-light); box-shadow: 0 0 60px rgba(201,168,76,0.5); }
+    .hero-note { font-size: 13px; color: var(--muted); font-weight: 300; }
+    .hero-scroll {
+      position: absolute;
+      bottom: 0px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: fadeDown 1s 0.6s ease both;
+    }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--gold), transparent); animation: scrollLine 2s ease-in-out infinite; }
+
+    /* ===== PAIN ===== */
+    .pain { padding: 80px 28px; max-width: 900px; margin: 0 auto; text-align: center; }
+    .section-label { font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin-bottom: 20px; }
+    .pain-title { font-family: 'Playfair Display', serif; font-size: clamp(26px, 6vw, 48px); font-weight: 700; line-height: 1.15; margin-bottom: 48px; }
+    .pain-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .pain-card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 28px 24px; text-align: left; transition: border-color 0.3s, transform 0.3s; }
+    .pain-card:hover { border-color: rgba(201,168,76,0.2); transform: translateY(-3px); }
+    .pain-emoji-wrap { margin-bottom: 14px; }
+    .pain-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--white); }
+    .pain-card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+    /* ===== REVEAL ===== */
+    .reveal-sec { padding: 60px 28px 80px; text-align: center; position: relative; overflow: hidden; }
+    .reveal-sec::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(61,170,107,0.07) 0%, transparent 70%); pointer-events: none; }
+    .reveal-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5.5vw, 44px); font-weight: 700; max-width: 700px; margin: 0 auto 14px; line-height: 1.2; }
+    .reveal-sub { font-size: clamp(15px, 4vw, 17px); color: var(--muted); max-width: 520px; margin: 0 auto 48px; font-weight: 300; }
+
+    /* ===== FEATURE TABLE — DESKTOP ===== */
+    .feature-table { max-width: 820px; margin: 0 auto 60px; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+    .ft-header { display: grid; grid-template-columns: 1fr 1fr; background: var(--dark3); }
+    .ft-col-label { padding: 14px 24px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; }
+    .ft-col-label.before { color: var(--muted); border-right: 1px solid rgba(255,255,255,0.06); }
+    .ft-col-label.after { color: var(--gold); }
+    .ft-row { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
+    .ft-row:hover { background: rgba(255,255,255,0.02); }
+    .ft-cell { padding: 18px 24px; font-size: 14.5px; display: flex; align-items: center; gap: 10px; line-height: 1.45; }
+    .ft-cell.before { color: var(--muted); border-right: 1px solid rgba(255,255,255,0.05); font-weight: 300; }
+    .ft-cell.after { color: var(--white); font-weight: 400; }
+
+    /* ===== FEATURE TABLE — MOBILE CARD STYLE ===== */
+    .ft-mobile { display: none; max-width: 500px; margin: 0 auto 60px; display: none; flex-direction: column; gap: 10px; }
+    .ft-mobile-row {
+      background: var(--dark2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .ft-mobile-before {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 300;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .ft-mobile-after {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--white);
+      font-weight: 500;
+      background: rgba(61,170,107,0.06);
+    }
+
+    /* ===== FEATURES GRID ===== */
+    .features { padding: 0 28px 80px; }
+    .features-title { font-family: 'Playfair Display', serif; font-size: clamp(22px, 5vw, 38px); font-weight: 700; text-align: center; margin-bottom: 40px; }
+    .features-grid { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .feat-item { background: var(--dark2); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 18px 16px; display: flex; align-items: center; gap: 12px; transition: border-color 0.3s, transform 0.2s; }
+    .feat-item:hover { border-color: rgba(201,168,76,0.25); transform: translateY(-2px); }
+    .feat-icon { width: 40px; height: 40px; background: rgba(201,168,76,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .feat-item span { font-size: 13.5px; font-weight: 500; color: var(--white); line-height: 1.35; }
+
+    /* ===== PRICING ===== */
+    .pricing { padding: 60px 28px 80px; text-align: center; }
+    .pricing-title { font-family: 'Playfair Display', serif; font-size: clamp(24px, 5.5vw, 42px); font-weight: 700; margin-bottom: 10px; }
+    .pricing-sub { color: var(--muted); font-size: 15px; margin-bottom: 48px; font-weight: 300; }
+    .pricing-cards { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 1000px; margin: 0 auto; }
+
+    .plan-card { background: var(--dark2); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 36px 28px; width: 290px; text-align: left; position: relative; transition: transform 0.3s, border-color 0.3s; }
+    .plan-card:hover { transform: translateY(-4px); }
+    .plan-card.featured { border-color: var(--gold); background: var(--dark3); box-shadow: 0 0 60px rgba(201,168,76,0.15); order: -1; }
+    .plan-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #0F0F1A; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 14px; border-radius: 100px; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+    .plan-name { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 10px; }
+    .plan-price { font-family: 'Playfair Display', serif; font-size: 44px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+    .plan-price sup { font-size: 20px; vertical-align: super; font-family: 'DM Sans', sans-serif; font-weight: 400; }
+    .plan-price sub { font-size: 15px; vertical-align: baseline; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--muted); }
+    .plan-desc { font-size: 13px; color: var(--muted); margin-bottom: 24px; font-weight: 300; line-height: 1.55; }
+    .plan-features { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+    .plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--white); line-height: 1.4; }
+    .btn-plan { display: block; width: 100%; text-align: center; padding: 15px; border-radius: 100px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-plan.gold { background: var(--gold); color: #0F0F1A; box-shadow: 0 0 30px rgba(201,168,76,0.3); }
+    .btn-plan.gold:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(201,168,76,0.5); }
+    .btn-plan.outline { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.2); }
+    .btn-plan.outline:hover { border-color: rgba(255,255,255,0.4); }
+
+    /* ===== FINAL CTA ===== */
+    .final-cta { padding: 80px 28px 100px; text-align: center; position: relative; overflow: hidden; }
+    .final-cta::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(201,168,76,0.12) 0%, transparent 70%); pointer-events: none; }
+    .final-title { font-family: 'Playfair Display', serif; font-size: clamp(28px, 7vw, 58px); font-weight: 900; line-height: 1.1; max-width: 720px; margin: 0 auto 18px; }
+    .final-title em { font-style: italic; color: var(--gold); }
+    .final-sub { font-size: clamp(15px, 4vw, 17px); color: var(--muted); max-width: 480px; margin: 0 auto 40px; font-weight: 300; }
+
+    /* ===== FOOTER ===== */
+    footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 28px 24px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+    @keyframes scrollLine {
+      0%   { transform: scaleY(0); transform-origin: top; }
+      50%  { transform: scaleY(1); transform-origin: top; }
+      51%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+    .ros { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .ros.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 640px) {
+
+      body { padding-bottom: 80px; }
+
+      /* Sticky bar aparece */
+      .sticky-bar { display: block; }
+
+      /* Hero */
+      .hero { padding: 80px 28px 20px; min-height: 66svh; }
+      .hero-scroll {
+      }
+
+      /* Pain cards — 1 coluna */
+      .pain { padding: 60px 20px; }
+      .pain-cards { grid-template-columns: 1fr; }
+
+      /* Feature table desktop — esconde */
+      .feature-table { display: none; }
+
+      /* Feature table mobile — mostra */
+      .ft-mobile { display: flex; }
+
+      /* Features grid — 1 coluna */
+      .features { padding: 0 20px 60px; }
+      .features-grid { grid-template-columns: 1fr; gap: 8px; }
+      .feat-item { padding: 16px 14px; }
+
+      /* Pricing — 1 coluna, Essencial primeiro (order: -1 já definido) */
+      .pricing { padding: 50px 20px 60px; }
+      .pricing-cards { flex-direction: column; align-items: center; }
+      .plan-card { width: 100%; max-width: 400px; padding: 32px 24px; }
+      /* No mobile, Essencial fica primeiro graças ao order: -1 */
+
+      /* Reveal */
+      .reveal-sec { padding: 50px 20px 60px; }
+
+      /* Final CTA */
+      .final-cta { padding: 60px 20px 80px; }
+      .btn-primary { font-size: 16px; padding: 16px 32px; width: 100%; justify-content: center; }
+    }
+  </style>
+  <!-- Meta Pixel Code -->
+   <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '4435391370118106');
+    fbq('track', 'PageView');
+  </script>
+   <!-- End Meta Pixel Code -->
+</head>
+<body>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=4435391370118106&ev=PageView&noscript=1"/></noscript>
+
+<!-- ===== STICKY BAR (mobile only) ===== -->
+<div class="sticky-bar">
+  <a href="#planos">
+    <img class="ae" style="width:16px;height:16px;" src="https://em-content.zobj.net/source/apple/354/rocket_1f680.png" alt="" />
+    Assinar Essencial — R$67,50/mês
+  </a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Procura-se empreendedoras
+  </div>
+  <h1 class="hero-headline">
+    Você chegou no<br>lugar <em>certo.</em>
+  </h1>
+  <p class="hero-sub">
+    Se você é MEI e ainda gerencia tudo no improviso — DAS no susto, nota fiscal no site da prefeitura, financeiro no caderno — isso aqui foi feito pra você.
+  </p>
+  <div class="hero-cta">
+    <a href="#planos" class="btn-primary">
+      <img class="ae" style="width:18px;height:18px;" src="https://em-content.zobj.net/source/apple/354/rocket_1f680.png" alt="" />
+      Quero organizar meu MEI
+    </a>
+    <p class="hero-note">Sem fidelidade · Cancele quando quiser</p>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ===== DOR ===== -->
+<section class="pain">
+  <p class="section-label">A realidade de quem é MEI</p>
+  <h2 class="pain-title ros">Ser MEI não deveria ser<br>tão complicado assim</h2>
+  <div class="pain-cards">
+
+    <div class="pain-card ros">
+      <div class="pain-emoji-wrap">
+        <img class="ae-lg" src="https://em-content.zobj.net/source/apple/354/anxious-face-with-sweat_1f630.png" alt="" />
+      </div>
+      <h3>DAS no susto todo mês</h3>
+      <p>Você lembra da guia só quando o boleto está vencendo — ou pior, depois. Multa, juros, dívida ativa.</p>
+    </div>
+
+    <div class="pain-card ros">
+      <div class="pain-emoji-wrap">
+        <img class="ae-lg" src="https://em-content.zobj.net/source/apple/354/receipt_1f9fe.png" alt="" />
+      </div>
+      <h3>Nota fiscal é uma odisseia</h3>
+      <p>Entra no site da prefeitura, esquece a senha, perde o histórico. Cada emissão parece a primeira vez.</p>
+    </div>
+
+    <div class="pain-card ros">
+      <div class="pain-emoji-wrap">
+        <img class="ae-lg" src="https://em-content.zobj.net/source/apple/354/bar-chart_1f4ca.png" alt="" />
+      </div>
+      <h3>Não sabe se está tendo lucro</h3>
+      <p>O dinheiro entra, o dinheiro sai. No fim do mês você não sabe exatamente onde foi parar.</p>
+    </div>
+
+    <div class="pain-card ros">
+      <div class="pain-emoji-wrap">
+        <img class="ae-lg" src="https://em-content.zobj.net/source/apple/354/spiral-notepad_1f5d2-fe0f.png" alt="" />
+      </div>
+      <h3>Declaração anual no aperto</h3>
+      <p>Uma vez por ano você entra em pânico tentando juntar tudo que aconteceu nos últimos 12 meses.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== VIRADA ===== -->
+<section class="reveal-sec">
+  <p class="section-label ros">A solução</p>
+  <h2 class="reveal-title ros">Conheça o Precisão MEI</h2>
+  <p class="reveal-sub ros">Um app completo que cuida de toda a burocracia do seu MEI — para você focar no que realmente importa: o seu negócio.</p>
+
+  <!-- DESKTOP: tabela lado a lado -->
+  <div class="feature-table ros">
+    <div class="ft-header">
+      <div class="ft-col-label before">Hoje, sem o app</div>
+      <div class="ft-col-label after">Com o Precisão MEI</div>
+    </div>
+    <div class="ft-row">
+      <div class="ft-cell before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Lembra do DAS quando está vencendo</div>
+      <div class="ft-cell after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> DAS automático com alerta e parcelamento</div>
+    </div>
+    <div class="ft-row">
+      <div class="ft-cell before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Emite nota no site da prefeitura</div>
+      <div class="ft-cell after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> Nota emitida em segundos, histórico completo</div>
+    </div>
+    <div class="ft-row">
+      <div class="ft-cell before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Não sabe ao certo o lucro do mês</div>
+      <div class="ft-cell after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> Relatório de faturamento e despesas em tempo real</div>
+    </div>
+    <div class="ft-row">
+      <div class="ft-cell before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Clientes anotados no caderno ou no WhatsApp</div>
+      <div class="ft-cell after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> CRM com agenda, orçamentos e recibos</div>
+    </div>
+    <div class="ft-row">
+      <div class="ft-cell before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Declaração anual no desespero</div>
+      <div class="ft-cell after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> Tudo registrado o ano todo. Declaração em minutos</div>
+    </div>
+    <div class="ft-row">
+      <div class="ft-cell before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Não tem site profissional</div>
+      <div class="ft-cell after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> O app cria seu site automaticamente com IA</div>
+    </div>
+  </div>
+
+  <!-- MOBILE: cards empilhados antes→depois -->
+  <div class="ft-mobile">
+
+    <div class="ft-mobile-row ros">
+      <div class="ft-mobile-before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Lembra do DAS quando está vencendo</div>
+      <div class="ft-mobile-after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> DAS automático com alerta e parcelamento</div>
+    </div>
+
+    <div class="ft-mobile-row ros">
+      <div class="ft-mobile-before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Emite nota no site da prefeitura</div>
+      <div class="ft-mobile-after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> Nota emitida em segundos, histórico completo</div>
+    </div>
+
+    <div class="ft-mobile-row ros">
+      <div class="ft-mobile-before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Não sabe ao certo o lucro do mês</div>
+      <div class="ft-mobile-after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> Relatório de faturamento e despesas em tempo real</div>
+    </div>
+
+    <div class="ft-mobile-row ros">
+      <div class="ft-mobile-before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Clientes anotados no caderno ou WhatsApp</div>
+      <div class="ft-mobile-after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> CRM com agenda, orçamentos e recibos</div>
+    </div>
+
+    <div class="ft-mobile-row ros">
+      <div class="ft-mobile-before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Declaração anual no desespero</div>
+      <div class="ft-mobile-after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> Tudo registrado o ano todo. Declaração em minutos</div>
+    </div>
+
+    <div class="ft-mobile-row ros">
+      <div class="ft-mobile-before"><img class="ae" src="https://em-content.zobj.net/source/apple/354/pensive-face_1f614.png" alt="" /> Não tem site profissional</div>
+      <div class="ft-mobile-after"><img class="ae" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="" /> O app cria seu site com IA automaticamente</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FUNCIONALIDADES ===== -->
+<section class="features">
+  <h2 class="features-title ros">Tudo que o seu MEI precisa,<br>num só lugar</h2>
+  <div class="features-grid">
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/memo_1f4dd.png" alt="" /></div><span>DAS automático + parcelamento + dívida ativa</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/receipt_1f9fe.png" alt="" /></div><span>Emissão de notas fiscais de serviço e comércio</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/money-bag_1f4b0.png" alt="" /></div><span>Controle de caixa (entradas e saídas)</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/calendar_1f4c5.png" alt="" /></div><span>Agenda e gestão de clientes</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/package_1f4e6.png" alt="" /></div><span>Controle de estoque e produtos</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/handshake_1f91d.png" alt="" /></div><span>Cadastro de fornecedores</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/page-facing-up_1f4c4.png" alt="" /></div><span>Orçamentos e recibos profissionais</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/bar-chart_1f4ca.png" alt="" /></div><span>Relatórios financeiros detalhados</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/bell_1f514.png" alt="" /></div><span>Alertas inteligentes de vencimentos</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/file-folder_1f4c1.png" alt="" /></div><span>Documentos enviados e recebidos</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/globe-with-meridians_1f310.png" alt="" /></div><span>Criação automática de site por IA</span></div>
+    <div class="feat-item ros"><div class="feat-icon"><img class="ae-ft" src="https://em-content.zobj.net/source/apple/354/mobile-phone_1f4f1.png" alt="" /></div><span>Acesso Web + App mobile</span></div>
+  </div>
+</section>
+
+<!-- ===== PLANOS ===== -->
+<section class="pricing" id="planos">
+  <p class="section-label ros">Planos</p>
+  <h2 class="pricing-title ros">Escolha o seu plano</h2>
+  <p class="pricing-sub ros">Sem fidelidade. Cancele quando quiser.</p>
+
+  <div class="pricing-cards">
+
+    <!-- Essencial (DESTAQUE) — order:-1 faz ele ser primeiro no mobile -->
+    <div class="plan-card featured ros">
+      <div class="plan-badge">
+        <img style="width:12px;height:12px;" src="https://em-content.zobj.net/source/apple/354/star_2b50.png" alt="" />
+        Mais popular
+      </div>
+      <p class="plan-name" style="color: var(--gold-light)">Precisão Essencial</p>
+      <p class="plan-price"><sup>R$</sup>67<span style="font-size:28px">,50</span><sub>/mês</sub></p>
+      <p class="plan-desc">Para quem precisa de mais recursos e controle do negócio.</p>
+      <ul class="plan-features">
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> DAS mensal automático</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Até 20 notas de serviço e comércio/mês</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Cadastro de produtos e estoque</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Cadastro de fornecedores</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Relatórios financeiros detalhados</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Monitoramento de faturamento</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Revisão anual completa</li>
+      </ul>
+      <a href="https://pay.kiwify.com.br/S7ueRRL?coupon=DESCONTO20" class="btn-plan gold" target="_blank">Assinar Essencial</a>
+    </div>
+
+    <!-- Start -->
+    <div class="plan-card ros">
+      <p class="plan-name">Precisão Start</p>
+      <p class="plan-price"><sup>R$</sup>47<span style="font-size:28px">,50</span><sub>/mês</sub></p>
+      <p class="plan-desc">O plano ideal para começar a gestão de forma simples e organizada.</p>
+      <ul class="plan-features">
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> DAS mensal automático</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Declaração anual</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Lançamento de caixa</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Contas a pagar e receber</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Emissão de recibos</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Até 5 notas de serviço/mês</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Acesso Web + App</li>
+      </ul>
+      <a href="https://pay.kiwify.com.br/KOBUOzv?coupon=DESCONTO20" class="btn-plan outline" target="_blank">Assinar Start</a>
+    </div>
+
+    <!-- Prime -->
+    <div class="plan-card ros">
+      <p class="plan-name">Precisão Prime</p>
+      <p class="plan-price"><sup>R$</sup>177<span style="font-size:28px">,50</span><sub>/mês</sub></p>
+      <p class="plan-desc">O plano completo com todos os recursos e suporte premium.</p>
+      <ul class="plan-features">
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Tudo do Essencial +</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Notas ilimitadas</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Painel gerencial completo</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Suporte contábil premium</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Parcelamento DAS com acompanhamento</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Regularização completa</li>
+        <li><img class="ae-ck" src="https://em-content.zobj.net/source/apple/354/check-mark-button_2705.png" alt="✓" /> Site criado por IA (exclusivo)</li>
+      </ul>
+      <a href="https://pay.kiwify.com.br/fCGiLZ8?coupon=DESCONTO20" class="btn-plan outline" target="_blank">Assinar Prime</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="final-cta">
+  <h2 class="final-title ros">Sua gestão no <em>automático.</em><br>A partir de hoje.</h2>
+  <p class="final-sub ros">Menos burocracia. Mais tempo para o que importa: crescer o seu negócio.</p>
+  <a href="#planos" class="btn-primary ros">
+    <img class="ae" style="width:18px;height:18px;vertical-align:middle;" src="https://em-content.zobj.net/source/apple/354/rocket_1f680.png" alt="" />
+    Quero organizar meu MEI agora
+  </a>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p>© 2026 Precisão MEI · Todos os direitos reservados</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 55);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.ros').forEach(el => obs.observe(el));
+
+  // Sticky bar — aparece após 300px de scroll, some na seção de planos
+  const bar = document.querySelector('.sticky-bar');
+  const pricing = document.getElementById('planos');
+
+  if (bar) {
+    bar.style.opacity = '0';
+    bar.style.pointerEvents = 'none';
+    bar.style.transition = 'opacity 0.4s';
+
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY > 300;
+      const pricingVisible = pricing
+        ? pricing.getBoundingClientRect().top < window.innerHeight * 0.5
+        : false;
+
+      const shouldShow = scrolled && !pricingVisible;
+      bar.style.opacity = shouldShow ? '1' : '0';
+      bar.style.pointerEvents = shouldShow ? 'auto' : 'none';
+    }, { passive: true });
+  }
+</script>
+
+</body>
+</html>
