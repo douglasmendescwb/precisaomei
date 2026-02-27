@@ -94,6 +94,10 @@
       padding: 80px 28px 70px;
       position: relative;
       overflow: hidden;
+      background-image: url("https://lp.precisaomei.com.br/bg.webp");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
     .hero::before {
       content: '';
@@ -308,8 +312,7 @@
 
       /* Hero */
       .hero { padding: 80px 28px 20px; min-height: 66svh; }
-      .hero-scroll {
-      }
+      .hero-scroll { display: none;}
 
       /* Pain cards — 1 coluna */
       .pain { padding: 60px 20px; }
@@ -338,6 +341,11 @@
       /* Final CTA */
       .final-cta { padding: 60px 20px 80px; }
       .btn-primary { font-size: 16px; padding: 16px 32px; width: 100%; justify-content: center; }
+    }
+
+    .logotipo {
+      max-width: 100px;
+      margin-bottom: 30px;
     }
   </style>
   <!-- Meta Pixel Code -->
@@ -368,6 +376,7 @@
 
 <!-- ===== HERO ===== -->
 <section class="hero">
+  <img src="https://lp.precisaomei.com.br/icone.svg" class="logotipo"/>
   <div class="hero-badge">
     <span class="dot"></span>
     Procura-se empreendedoras
